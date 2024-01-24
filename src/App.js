@@ -223,7 +223,7 @@ const App = () => {
         </h1>
         {
           online ? <h2 style={{ color: "green" }}> {loading ? "Sicronizando..." : "Online"}</h2> : <h2 style={{ color: "red" }}>
-            Offline - <Badge count={dataOff?.length} showZero color='#faad14' />
+            Offline - <Badge count={dataOff?.length > 0 ? dataOff?.length : 0} showZero color='#faad14' />
           </h2>
         }
         {
