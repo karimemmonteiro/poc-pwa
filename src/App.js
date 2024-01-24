@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import localforage from 'localforage';
 import axios from 'axios';
-import Desconectado from "./desconectado.svg"
 import { Spin } from 'antd';
 
 const App = () => {
@@ -20,16 +19,16 @@ const App = () => {
       // Obter dados locais
       const storedData = await localforage.getItem('DataOffiline');
       console.log('Dados Locais Antes:', storedData);
-  
+
       // Obter dados da API
       const response = await axios.get('https://x8ki-letl-twmt.n7.xano.io/api:XrvEIpMk/produtos');
       const newData = response.data;
       console.log('Dados da API:', newData);
-  
+
       // Combinar dados locais com dados da API
       const combinedData = storedData ? [...storedData, ...newData] : newData;
       console.log('Dados Combinados:', combinedData);
-  
+
       // Atualizar o estado apenas se houver dados
       if (combinedData.length > 0) {
         setData(combinedData);
@@ -41,12 +40,12 @@ const App = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
-  
- 
+
+
 
   useEffect(() => {
     const handleOnlineStatusChange = () => {
@@ -60,7 +59,9 @@ const App = () => {
       window.removeEventListener('offline', handleOnlineStatusChange);
     };
   }, []);
-  
+
+
+
 
 
 
@@ -92,7 +93,9 @@ const App = () => {
 
     const syncItem = (index) => {
       const currentItem = data[index];
-
+      setTimeout(() => {
+        setLoading(false);
+      }, 4000); 
       if (currentItem.status !== true) {
         currentItem.status = true;
 
@@ -104,23 +107,27 @@ const App = () => {
               localforage.setItem('DataOffiline', []).then(() => {
                 setData([]);
                 fetchData();
-                setLoading(false);
+                setTimeout(() => {
+                  setLoading(false);
+                }, 4000); 
               });
             }
           })
           .catch((error) => {
             console.error("Erro ao sincronizar dados:", error);
-            
-            setLoading(false);
+            setTimeout(() => {
+              setLoading(false);
+            }, 4000); 
           });
       } else {
         if (index < data.length - 1) {
           syncItem(index + 1);
         } else {
           localforage.setItem('DataOffiline', []).then(() => {
-          setData([]);
-
-            setLoading(false);
+            setData([]);
+            setTimeout(() => {
+              setLoading(false);
+            }, 4000); 
           });
         }
       }
@@ -129,7 +136,14 @@ const App = () => {
     syncItem(0);
   };
 
-  
+  useEffect(() => {
+    console.log("teste validaçao", validaçaoSicronizar)
+    if (validaçaoSicronizar) {
+      handleSyncOnline()
+    }
+  }, [online])
+
+
   console.log('teste fiteste ', data)
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100svw", }}>
@@ -139,18 +153,10 @@ const App = () => {
 
         </h1>
         {
-          online ? <h2 style={{ color: "green" }}>Online</h2> : <h2 style={{ color: "red" }}>Offline</h2>
+          online ? <h2 style={{ color: "green" }}> { loading ? "Sicronizando...":  "Online"}</h2> : <h2 style={{ color: "red" }}>Offline</h2>
         }
         {
-          !loading ? <button disabled={!validaçaoSicronizar} style={{
-            backgroundColor: !validaçaoSicronizar ? '#bdc3c7' : 'green',
-            color: !validaçaoSicronizar ? '#7f8c8d' : '#fff',
-            padding: '10px 10px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: !validaçaoSicronizar ? 'not-allowed' : 'pointer',
-          }} onClick={handleSyncOnline}>
-            Sincronizar Online</button>
+          !loading ? null
             : <Spin
               indicator={
                 <LoadingOutlined
