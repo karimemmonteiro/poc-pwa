@@ -61,25 +61,81 @@ const App = () => {
   }, []);
 
 
-
-
-
-
   const handleSaveOffline = () => {
-    const newData = [...data, {
+    const newItem = {
       name: inputName,
       value: inputValue,
       amount: inputAmount,
       status: false
-    }];
-    const FilterData = newData.filter(item => item.status === false);
-    localforage.setItem('DataOffiline', FilterData).then(() => {
-      setData(newData);
-    });
+    };
+  
+    const newData = [...data, newItem];
+  
+    if (online) {
+      setLoading(true);
+      console.log("teste status", newData);
+  
+      const syncItem = (index) => {
+        const currentItem = newData[index];
+  
+        // Verifique o status usando currentItem.status
+        if (currentItem.status === false) {
+          console.log("teste status========================================", newData);
+          currentItem.status = true;
+          console.log("teste status", currentItem.status);
+  
+          axios.post('https://x8ki-letl-twmt.n7.xano.io/api:XrvEIpMk/produtos', currentItem)
+            .then(() => {
+              if (index < newData.length - 1) {
+                syncItem(index + 1);
+              } else {
+                localforage.setItem('DataOffiline', []).then(() => {
+                  setData([]);
+                  fetchData();
+                  setTimeout(() => {
+                    setLoading(false);
+                  }, 4000);
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Erro ao sincronizar dados:", error);
+              setTimeout(() => {
+                setLoading(false);
+              }, 4000);
+            });
+        } else {
+          if (index < newData.length - 1) {
+            syncItem(index + 1);
+          } else {
+            localforage.setItem('DataOffiline', []).then(() => {
+              setData([]);
+              setTimeout(() => {
+                setLoading(false);
+              }, 4000);
+            });
+          }
+        }
+      };
+  
+      syncItem(0);
+  
+    } else {
+      localforage.getItem('DataOffiline').then((offlineData) => {
+        const updatedOfflineData = offlineData ? [...offlineData, newItem] : [newItem];
+        localforage.setItem('DataOffiline', updatedOfflineData).then(() => {
+          // Use newData aqui para atualizar os dados localmente
+          setData(newData);
+        });
+      });
+    }
+  
     setInputName('');
     setInputValue(0);
     setInputAmount(0);
   };
+  
+  
 
   const handleSyncOnline = () => {
     setLoading(true);
@@ -95,7 +151,7 @@ const App = () => {
       const currentItem = data[index];
       setTimeout(() => {
         setLoading(false);
-      }, 4000); 
+      }, 4000);
       if (currentItem.status !== true) {
         currentItem.status = true;
 
@@ -109,7 +165,7 @@ const App = () => {
                 fetchData();
                 setTimeout(() => {
                   setLoading(false);
-                }, 4000); 
+                }, 4000);
               });
             }
           })
@@ -117,7 +173,7 @@ const App = () => {
             console.error("Erro ao sincronizar dados:", error);
             setTimeout(() => {
               setLoading(false);
-            }, 4000); 
+            }, 4000);
           });
       } else {
         if (index < data.length - 1) {
@@ -127,7 +183,7 @@ const App = () => {
             setData([]);
             setTimeout(() => {
               setLoading(false);
-            }, 4000); 
+            }, 4000);
           });
         }
       }
@@ -153,7 +209,7 @@ const App = () => {
 
         </h1>
         {
-          online ? <h2 style={{ color: "green" }}> { loading ? "Sicronizando...":  "Online"}</h2> : <h2 style={{ color: "red" }}>Offline</h2>
+          online ? <h2 style={{ color: "green" }}> {loading ? "Sicronizando..." : "Online"}</h2> : <h2 style={{ color: "red" }}>Offline</h2>
         }
         {
           !loading ? null
