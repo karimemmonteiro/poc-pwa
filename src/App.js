@@ -264,7 +264,7 @@ const App = () => {
       <div style={{ width: "100vw", display: "flex", justifyContent: "center", gap: 10, paddingTop: "2rem" }}>
         {
           !online ?
-            <img width={450} src={Desconectado} alt="desconectado" />
+            <img width={450} src="./desconectado.svg" alt="desconectado" />
             : null
         }
       </div>
