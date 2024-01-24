@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import localforage from 'localforage';
 import axios from 'axios';
-import { Spin } from 'antd';
+import { Badge, message, Spin } from 'antd';
 
 const App = () => {
   const [data, setData] = useState([]);
+  const [dataOff, setDataOff] = useState([]);
+  const [messageApi, contextHolder] = message.useMessage();
   const [online, setOnline] = useState(navigator.onLine);
   const [inputName, setInputName] = useState('');
   const [inputValue, setInputValue] = useState(0);
@@ -24,7 +26,7 @@ const App = () => {
       const response = await axios.get('https://x8ki-letl-twmt.n7.xano.io/api:XrvEIpMk/produtos');
       const newData = response.data;
       console.log('Dados da API:', newData);
-
+      setDataOff(storedData)
       // Combinar dados locais com dados da API
       const combinedData = storedData ? [...storedData, ...newData] : newData;
       console.log('Dados Combinados:', combinedData);
@@ -50,6 +52,7 @@ const App = () => {
   useEffect(() => {
     const handleOnlineStatusChange = () => {
       setOnline(navigator.onLine);
+
     };
 
     window.addEventListener('online', handleOnlineStatusChange);
@@ -68,22 +71,22 @@ const App = () => {
       amount: inputAmount,
       status: false
     };
-  
+
     const newData = [...data, newItem];
-  
+
     if (online) {
       setLoading(true);
       console.log("teste status", newData);
-  
+
       const syncItem = (index) => {
         const currentItem = newData[index];
-  
+
         // Verifique o status usando currentItem.status
         if (currentItem.status === false) {
           console.log("teste status========================================", newData);
           currentItem.status = true;
           console.log("teste status", currentItem.status);
-  
+
           axios.post('https://x8ki-letl-twmt.n7.xano.io/api:XrvEIpMk/produtos', currentItem)
             .then(() => {
               if (index < newData.length - 1) {
@@ -117,9 +120,9 @@ const App = () => {
           }
         }
       };
-  
+
       syncItem(0);
-  
+
     } else {
       localforage.getItem('DataOffiline').then((offlineData) => {
         const updatedOfflineData = offlineData ? [...offlineData, newItem] : [newItem];
@@ -129,13 +132,13 @@ const App = () => {
         });
       });
     }
-  
+
     setInputName('');
     setInputValue(0);
     setInputAmount(0);
   };
-  
-  
+
+
 
   const handleSyncOnline = () => {
     setLoading(true);
@@ -196,20 +199,32 @@ const App = () => {
     console.log("teste validaçao", validaçaoSicronizar)
     if (validaçaoSicronizar) {
       handleSyncOnline()
+    }else{
+      warning()
     }
   }, [online])
+
+  function warning(){
+    messageApi.open({
+      type: 'warning',
+      content: 'This is a warning message',
+    });
+  };
 
 
   console.log('teste fiteste ', data)
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100svw", }}>
+       {contextHolder}
       <div style={{ paddingLeft: "2rem", display: "flex", flexDirection: "row", alignItems: "center", gap: 30 }} >
         <h1 style={{ color: "#005eb8", display: "flex", flexDirection: "row" }}>
           Lista de Produtos -
 
         </h1>
         {
-          online ? <h2 style={{ color: "green" }}> {loading ? "Sicronizando..." : "Online"}</h2> : <h2 style={{ color: "red" }}>Offline</h2>
+          online ? <h2 style={{ color: "green" }}> {loading ? "Sicronizando..." : "Online"}</h2> : <h2 style={{ color: "red" }}>
+            Offline - <Badge count={dataOff?.length} showZero color='#faad14' />
+          </h2>
         }
         {
           !loading ? null
@@ -326,7 +341,19 @@ const App = () => {
       <div style={{ width: "100vw", display: "flex", justifyContent: "center", gap: 10, paddingTop: "2rem" }}>
         {
           !online ?
-            <img width={450} src="./desconectado.svg" alt="desconectado" />
+            // <div style={{ width: "5rem" }}>
+
+            //   <Result
+            //     iconFontSize={10}
+                
+                
+            //     status="500"
+            //     title="500"
+            //     subTitle="Sorry, something went wrong."
+            //     extra={<Button type="primary">Back Home</Button>}
+            //   />
+            // </div>
+            null
             : null
         }
       </div>
