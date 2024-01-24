@@ -19,7 +19,7 @@
     },
     {
       "src": "desconectado.svg",
-      "type": "image/svg+xml",
+      "type": "image/svg",
       "sizes": "any"
     }
   ],
