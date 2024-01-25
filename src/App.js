@@ -6,7 +6,6 @@ import { Badge, message, Spin } from 'antd';
 
 const App = () => {
   const [data, setData] = useState([]);
-  const [dataOff, setDataOff] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
   const [online, setOnline] = useState(navigator.onLine);
   const [inputName, setInputName] = useState('');
@@ -18,24 +17,20 @@ const App = () => {
 
   const fetchData = async () => {
     try {
-      // Obter dados locais
       const storedData = await localforage.getItem('DataOffiline');
       console.log('Dados Locais Antes:', storedData);
-
-      // Obter dados da API
       const response = await axios.get('https://x8ki-letl-twmt.n7.xano.io/api:XrvEIpMk/produtos');
       const newData = response.data;
       console.log('Dados da API:', newData);
-      setDataOff(storedData)
-      // Combinar dados locais com dados da API
       const combinedData = storedData ? [...storedData, ...newData] : newData;
-      console.log('Dados Combinados:', combinedData);
-
-      // Atualizar o estado apenas se houver dados
+      console.log('Dados Combinados:', combinedData, "dados api", newData);
       if (combinedData.length > 0) {
         setData(combinedData);
       } else {
-        console.log('Nenhum dado disponível.');
+        setData(combinedData);
+      }
+      if(!online){
+        setData(storedData)
       }
     } catch (error) {
       console.error("Erro ao obter dados:", error);
