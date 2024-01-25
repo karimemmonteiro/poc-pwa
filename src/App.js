@@ -43,27 +43,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-
-
-  useEffect(() => {
-    const handleOnlineStatusChange = () => {
-      setOnline(navigator.onLine);
-
-    };
-
-    window.addEventListener('online', handleOnlineStatusChange);
-    window.addEventListener('offline', handleOnlineStatusChange);
-    return () => {
-      window.removeEventListener('online', handleOnlineStatusChange);
-      window.removeEventListener('offline', handleOnlineStatusChange);
-    };
-  }, []);
-
-
   const handleSaveOffline = () => {
     const newItem = {
       name: inputName,
@@ -196,26 +175,58 @@ const App = () => {
   };
 
   useEffect(() => {
+    fetchData();
+  }, []);
+
+
+
+  useEffect(() => {
+    const handleOnlineStatusChange = () => {
+      setOnline(navigator.onLine);
+
+    };
+
+    window.addEventListener('online', handleOnlineStatusChange);
+    window.addEventListener('offline', handleOnlineStatusChange);
+    return () => {
+      window.removeEventListener('online', handleOnlineStatusChange);
+      window.removeEventListener('offline', handleOnlineStatusChange);
+    };
+  }, []);
+
+
+
+
+  useEffect(() => {
     console.log("teste validaçao", validaçaoSicronizar)
     if (validaçaoSicronizar) {
       handleSyncOnline()
-    }else{
+    }
+    if (!online) {
       warning()
+    } else {
+      success()
     }
   }, [online])
+  
 
-  function warning(){
+  function warning() {
     messageApi.open({
       type: 'warning',
-      content: 'This is a warning message',
+      content: 'Sistema Desconectado',
+    });
+  };
+  function success() {
+    messageApi.open({
+      type: 'success',
+      content: 'Sistema Conectado',
     });
   };
 
 
-  console.log('teste fiteste ', data)
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100svw", }}>
-       {contextHolder}
+      {contextHolder}
       <div style={{ paddingLeft: "2rem", display: "flex", flexDirection: "row", alignItems: "center", gap: 30 }} >
         <h1 style={{ color: "#005eb8", display: "flex", flexDirection: "row" }}>
           Lista de Produtos -
@@ -345,8 +356,8 @@ const App = () => {
 
             //   <Result
             //     iconFontSize={10}
-                
-                
+
+
             //     status="500"
             //     title="500"
             //     subTitle="Sorry, something went wrong."
