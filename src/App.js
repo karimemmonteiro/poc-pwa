@@ -194,9 +194,6 @@ const App = () => {
     };
   }, []);
 
-
-
-
   useEffect(() => {
     console.log("teste validaçao", validaçaoSicronizar)
     if (validaçaoSicronizar) {
@@ -208,7 +205,7 @@ const App = () => {
       success()
     }
   }, [online])
-  
+
 
   function warning() {
     messageApi.open({
